@@ -1,0 +1,17 @@
+{
+  "name": "ASL Dice",
+  "short_name": "ASL Dice",
+  "description": "A personal dice roller and log for Advanced Squad Leader.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6f3eb",
+  "theme_color": "#263a2f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
