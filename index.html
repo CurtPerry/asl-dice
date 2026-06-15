@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#263a2f">
+    <title>ASL Dice</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="roller-panel" aria-label="Dice roller">
+        <header class="app-header">
+          <div>
+            <p class="kicker">Advanced Squad Leader</p>
+            <h1>ASL Dice</h1>
+          </div>
+          <div class="header-actions" aria-label="Log actions">
+            <button class="icon-button" id="delete-log-entry" type="button" aria-label="Delete latest log entry" title="Delete latest log entry">
+              Del
+            </button>
+            <button class="icon-button" id="clear-log" type="button" aria-label="Clear roll log" title="Clear roll log">
+              Clear
+            </button>
+          </div>
+        </header>
+
+        <div class="control-group" aria-label="Side">
+          <button class="segmented active" type="button" data-side="Axis">Axis</button>
+          <button class="segmented" type="button" data-side="Allied">Allied</button>
+        </div>
+
+        <div class="mode-grid" aria-label="Roll type">
+          <button class="mode-button active" type="button" data-mode="MC">MC</button>
+          <button class="mode-button" type="button" data-mode="IFT">IFT</button>
+          <button class="mode-button" type="button" data-mode="TC">TC</button>
+          <button class="mode-button" type="button" data-mode="SW">SW</button>
+          <button class="mode-button" type="button" data-mode="Smoke">Smoke</button>
+          <button class="mode-button" type="button" data-mode="Amb">Amb</button>
+          <button class="mode-button" type="button" data-mode="CC">CC</button>
+          <button class="mode-button" type="button" data-mode="GEN">GEN</button>
+        </div>
+
+        <button class="roll-button" id="roll-button" type="button">Roll</button>
+      </section>
+
+      <section class="log-panel" aria-label="Roll history">
+        <div class="log-header">
+          <h2>Log</h2>
+          <span id="log-count">0 rolls</span>
+        </div>
+        <ol class="roll-log" id="roll-log"></ol>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
