@@ -124,8 +124,55 @@ h2 {
 .mode-grid {
   margin: 12px 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(20, minmax(0, 1fr));
   gap: 8px;
+}
+
+.mode-button:nth-child(-n + 4) {
+  grid-column: span 5;
+}
+
+.mode-button:nth-child(n + 5) {
+  grid-column: span 4;
+}
+
+.hidden {
+  display: none;
+}
+
+.ift-panel {
+  margin: -4px 0 12px;
+}
+
+.ift-button-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.ift-firepower-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-bottom: 6px;
+}
+
+.ift-modifier-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.ift-option {
+  min-height: 36px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbf8ef;
+  color: var(--field);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.ift-option.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fffaf0;
 }
 
 .roll-button {
@@ -222,6 +269,15 @@ h2 {
   color: var(--muted);
 }
 
+.log-result {
+  color: var(--field-dark);
+  font-weight: 900;
+}
+
+.log-cower-result {
+  color: var(--accent-dark);
+}
+
 @media (min-width: 760px) {
   .app-shell {
     grid-template-columns: minmax(340px, 420px) 1fr;
@@ -252,5 +308,10 @@ h2 {
   .mode-button {
     min-height: 44px;
     font-size: 0.9rem;
+  }
+
+  .ift-option {
+    min-height: 34px;
+    font-size: 0.82rem;
   }
 }
