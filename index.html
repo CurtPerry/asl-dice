@@ -17,6 +17,9 @@
             <h1>ASL Dice</h1>
           </div>
           <div class="header-actions" aria-label="Log actions">
+            <button class="icon-button" id="open-setup" type="button" aria-label="Open scenario setup" title="Open scenario setup">
+              Setup
+            </button>
             <button class="icon-button" id="delete-log-entry" type="button" aria-label="Delete latest log entry" title="Delete latest log entry">
               Del
             </button>
@@ -36,6 +39,7 @@
           <button class="mode-button" type="button" data-mode="IFT">IFT</button>
           <button class="mode-button" type="button" data-mode="TC">TC</button>
           <button class="mode-button" type="button" data-mode="SW">SW</button>
+          <button class="mode-button" type="button" data-mode="HIP">HIP</button>
           <button class="mode-button" type="button" data-mode="Smoke">Smoke</button>
           <button class="mode-button" type="button" data-mode="Amb">Amb</button>
           <button class="mode-button" type="button" data-mode="CC">CC</button>
@@ -75,6 +79,11 @@
           </div>
         </div>
 
+        <div class="hip-panel hidden" id="hip-panel">
+          <div class="hip-status" id="hip-status"></div>
+          <div class="hip-location-grid" id="hip-location-grid" aria-label="HIP locations"></div>
+        </div>
+
         <button class="roll-button" id="roll-button" type="button">Roll</button>
       </section>
 
@@ -86,6 +95,25 @@
         <ol class="roll-log" id="roll-log"></ol>
       </section>
     </main>
+
+    <div class="setup-overlay hidden" id="setup-overlay">
+      <section class="setup-dialog" aria-label="Scenario setup">
+        <div class="setup-header">
+          <h2>Setup</h2>
+          <button class="icon-button" id="close-setup" type="button">Cancel</button>
+        </div>
+        <label class="setup-field">
+          <span>HIP locations</span>
+          <textarea id="hip-locations-input" rows="3" placeholder="W5N X3NE X5NW W13E"></textarea>
+        </label>
+        <label class="setup-field">
+          <span>Guns</span>
+          <input id="hip-gun-count" type="number" min="0" step="1" value="1">
+        </label>
+        <p class="setup-message" id="setup-message"></p>
+        <button class="roll-button setup-create-button" id="create-hip-setup" type="button">Create</button>
+      </section>
+    </div>
 
     <script src="app.js"></script>
   </body>
