@@ -3,6 +3,7 @@ const rollTypes = {
   IFT: { label: "Infantry Firetable Roll", dice: 2 },
   TC: { label: "Pin Check", dice: 2 },
   SW: { label: "Support Weapon Roll", dice: 1 },
+  HIP: { label: "HIP Reveal", dice: 0 },
   Smoke: { label: "Smoke Grenade Placement", dice: 1 },
   Amb: { label: "Ambush Roll", dice: 1 },
   CC: { label: "Close Combat Roll", dice: 2 },
@@ -11,6 +12,7 @@ const rollTypes = {
 };
 
 const storageKey = "asl-dice-log";
+const hipStorageKey = "asl-dice-hip-state";
 const maxLogEntries = 100;
 const iftFirepowers = [1, 2, 4, 6, 8, 12, 16, 20, 24, 30, 36];
 const iftResults = {
@@ -37,13 +39,24 @@ let selectedMode = "MC";
 let selectedFirepower = 8;
 let selectedModifier = 0;
 let logEntries = loadLog();
+let hipState = loadHipState();
 
+const openSetupButton = document.querySelector("#open-setup");
 const rollButton = document.querySelector("#roll-button");
 const clearLogButton = document.querySelector("#clear-log");
 const deleteLogEntryButton = document.querySelector("#delete-log-entry");
 const rollLog = document.querySelector("#roll-log");
 const logCount = document.querySelector("#log-count");
 const iftPanel = document.querySelector("#ift-panel");
+const hipPanel = document.querySelector("#hip-panel");
+const hipStatus = document.querySelector("#hip-status");
+const hipLocationGrid = document.querySelector("#hip-location-grid");
+const setupOverlay = document.querySelector("#setup-overlay");
+const closeSetupButton = document.querySelector("#close-setup");
+const createHipSetupButton = document.querySelector("#create-hip-setup");
+const hipLocationsInput = document.querySelector("#hip-locations-input");
+const hipGunCountInput = document.querySelector("#hip-gun-count");
+const setupMessage = document.querySelector("#setup-message");
 
 document.querySelectorAll("[data-side]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -56,7 +69,7 @@ document.querySelectorAll("[data-mode]").forEach((button) => {
   button.addEventListener("click", () => {
     selectedMode = button.dataset.mode;
     setActive("[data-mode]", button);
-    updateIftPanel();
+    updateModePanels();
   });
 });
 
@@ -76,6 +89,18 @@ document.querySelectorAll("[data-modifier]").forEach((button) => {
 
 rollButton.addEventListener("click", rollDice);
 
+openSetupButton.addEventListener("click", openSetup);
+
+closeSetupButton.addEventListener("click", closeSetup);
+
+setupOverlay.addEventListener("click", (event) => {
+  if (event.target === setupOverlay) {
+    closeSetup();
+  }
+});
+
+createHipSetupButton.addEventListener("click", createHipSetup);
+
 clearLogButton.addEventListener("click", () => {
   logEntries = [];
   saveLog();
@@ -89,7 +114,7 @@ deleteLogEntryButton.addEventListener("click", () => {
 });
 
 renderLog();
-updateIftPanel();
+updateModePanels();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -98,6 +123,10 @@ if ("serviceWorker" in navigator) {
 }
 
 function rollDice() {
+  if (selectedMode === "HIP") {
+    return;
+  }
+
   const rollType = rollTypes[selectedMode];
   const rolls = Array.from({ length: rollType.dice }, () => randomDie());
   const rawTotal = rolls.reduce((sum, roll) => sum + roll, 0);
@@ -134,8 +163,11 @@ function setActive(selector, activeButton) {
   });
 }
 
-function updateIftPanel() {
+function updateModePanels() {
   iftPanel.classList.toggle("hidden", selectedMode !== "IFT");
+  hipPanel.classList.toggle("hidden", selectedMode !== "HIP");
+  rollButton.classList.toggle("hidden", selectedMode === "HIP");
+  renderHipPanel();
 }
 
 function getIftResult(firepower, total) {
@@ -159,8 +191,34 @@ function loadLog() {
   }
 }
 
+function loadHipState() {
+  try {
+    return JSON.parse(localStorage.getItem(hipStorageKey)) || emptyHipState();
+  } catch {
+    return emptyHipState();
+  }
+}
+
+function saveHipState() {
+  localStorage.setItem(hipStorageKey, JSON.stringify(hipState));
+}
+
+function emptyHipState() {
+  return {
+    locations: [],
+    gunCount: 0,
+  };
+}
+
 function saveLog() {
   localStorage.setItem(storageKey, JSON.stringify(logEntries));
+}
+
+function addLogEntry(entry) {
+  logEntries.unshift(entry);
+  logEntries = logEntries.slice(0, maxLogEntries);
+  saveLog();
+  renderLog();
 }
 
 function renderLog() {
@@ -212,6 +270,11 @@ function normalizeLogEntry(entry) {
 }
 
 function renderLogEntry(item, entry) {
+  if (entry.kind === "message") {
+    item.textContent = entry.text;
+    return;
+  }
+
   const prefix = document.createElement("span");
   prefix.className = "log-label";
   prefix.textContent = `${entry.side} ${entry.label}: `;
@@ -256,4 +319,120 @@ function renderLogEntry(item, entry) {
     cowerResult.textContent = ` (Cower: ${entry.cowerResult})`;
     item.append(cowerResult);
   }
+}
+
+function openSetup() {
+  setupMessage.textContent = "";
+  hipLocationsInput.value = hipState.locations.map((location) => location.name).join(" ");
+  hipGunCountInput.value = hipState.gunCount || 1;
+  setupOverlay.classList.remove("hidden");
+  hipLocationsInput.focus();
+}
+
+function closeSetup() {
+  setupOverlay.classList.add("hidden");
+}
+
+function createHipSetup() {
+  const locations = parseHipLocations(hipLocationsInput.value);
+  const gunCount = Number(hipGunCountInput.value);
+
+  if (locations.length === 0) {
+    setupMessage.textContent = "Enter at least one HIP location.";
+    return;
+  }
+
+  if (!Number.isInteger(gunCount) || gunCount < 0 || gunCount > locations.length) {
+    setupMessage.textContent = `Guns must be 0-${locations.length}.`;
+    return;
+  }
+
+  const occupiedIndexes = chooseRandomIndexes(locations.length, gunCount);
+  hipState = {
+    gunCount,
+    locations: locations.map((name, index) => ({
+      name,
+      occupied: occupiedIndexes.includes(index),
+      revealed: false,
+    })),
+  };
+
+  saveHipState();
+  addLogEntry({
+    kind: "message",
+    text: `HIP setup: ${gunCount} guns hidden among ${locations.length} locations`,
+  });
+  renderHipPanel();
+  closeSetup();
+}
+
+function parseHipLocations(value) {
+  const seen = new Set();
+  return value
+    .split(/[\s,]+/)
+    .map((location) => location.trim().toUpperCase())
+    .filter(Boolean)
+    .filter((location) => {
+      if (seen.has(location)) {
+        return false;
+      }
+      seen.add(location);
+      return true;
+    });
+}
+
+function chooseRandomIndexes(total, count) {
+  const indexes = Array.from({ length: total }, (_, index) => index);
+
+  for (let index = indexes.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [indexes[index], indexes[swapIndex]] = [indexes[swapIndex], indexes[index]];
+  }
+
+  return indexes.slice(0, count);
+}
+
+function renderHipPanel() {
+  if (!hipPanel || selectedMode !== "HIP") {
+    return;
+  }
+
+  hipLocationGrid.innerHTML = "";
+  const unrevealed = hipState.locations.filter((location) => !location.revealed);
+
+  if (hipState.locations.length === 0) {
+    hipStatus.textContent = "No HIP setup";
+    return;
+  }
+
+  hipStatus.textContent = `${unrevealed.length} unrevealed of ${hipState.locations.length}`;
+
+  if (unrevealed.length === 0) {
+    hipStatus.textContent = "All HIP locations revealed";
+    return;
+  }
+
+  unrevealed.forEach((location) => {
+    const button = document.createElement("button");
+    button.className = "hip-location-button";
+    button.type = "button";
+    button.textContent = location.name;
+    button.addEventListener("click", () => revealHipLocation(location.name));
+    hipLocationGrid.append(button);
+  });
+}
+
+function revealHipLocation(locationName) {
+  const location = hipState.locations.find((candidate) => candidate.name === locationName);
+  if (!location || location.revealed) {
+    return;
+  }
+
+  location.revealed = true;
+  saveHipState();
+  addLogEntry({
+    kind: "message",
+    text: `HIP ${location.name}: ${location.occupied ? "Gun revealed!" : "Nothing there."}`,
+  });
+  renderHipPanel();
 }
