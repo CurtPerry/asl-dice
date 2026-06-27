@@ -61,6 +61,8 @@ button {
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
 }
 
@@ -124,16 +126,8 @@ h2 {
 .mode-grid {
   margin: 12px 0;
   display: grid;
-  grid-template-columns: repeat(20, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
-}
-
-.mode-button:nth-child(-n + 4) {
-  grid-column: span 5;
-}
-
-.mode-button:nth-child(n + 5) {
-  grid-column: span 4;
 }
 
 .hidden {
@@ -173,6 +167,32 @@ h2 {
   border-color: var(--accent);
   background: var(--accent);
   color: #fffaf0;
+}
+
+.hip-panel {
+  margin: -4px 0 12px;
+}
+
+.hip-status {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.hip-location-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.hip-location-button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbf8ef;
+  color: var(--field);
+  font-weight: 800;
 }
 
 .roll-button {
@@ -278,6 +298,68 @@ h2 {
   color: var(--accent-dark);
 }
 
+.setup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 33, 28, 0.58);
+}
+
+.setup-overlay.hidden {
+  display: none;
+}
+
+.setup-dialog {
+  width: min(100%, 430px);
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.setup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.setup-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--field);
+  font-weight: 800;
+}
+
+.setup-field textarea,
+.setup-field input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  background: #fffaf0;
+  color: var(--ink);
+  font: inherit;
+}
+
+.setup-message {
+  min-height: 20px;
+  margin: 0 0 10px;
+  color: var(--accent-dark);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.setup-create-button {
+  min-height: 52px;
+}
+
 @media (min-width: 760px) {
   .app-shell {
     grid-template-columns: minmax(340px, 420px) 1fr;
@@ -307,11 +389,20 @@ h2 {
 
   .mode-button {
     min-height: 44px;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
   }
 
   .ift-option {
     min-height: 34px;
     font-size: 0.82rem;
+  }
+
+  .icon-button {
+    min-height: 38px;
+    padding: 0 9px;
+  }
+
+  .hip-location-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
