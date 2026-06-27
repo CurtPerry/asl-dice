@@ -126,8 +126,16 @@ h2 {
 .mode-grid {
   margin: 12px 0;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(30, minmax(0, 1fr));
   gap: 8px;
+}
+
+.mode-button:nth-child(-n + 5) {
+  grid-column: span 6;
+}
+
+.mode-button:nth-child(n + 6) {
+  grid-column: span 5;
 }
 
 .hidden {
@@ -193,6 +201,31 @@ h2 {
   background: #fbf8ef;
   color: var(--field);
   font-weight: 800;
+}
+
+.random-selection-panel {
+  margin: -4px 0 12px;
+}
+
+.random-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.random-selection-option {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbf8ef;
+  color: var(--field);
+  font-weight: 800;
+}
+
+.random-selection-option.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fffaf0;
 }
 
 .roll-button {
@@ -282,6 +315,10 @@ h2 {
 .log-red-die {
   background: var(--accent);
   color: #fffaf0;
+}
+
+.log-random-die {
+  color: var(--ink);
 }
 
 .log-operator {
@@ -389,7 +426,7 @@ h2 {
 
   .mode-button {
     min-height: 44px;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
 
   .ift-option {
