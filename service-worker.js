@@ -1,4 +1,4 @@
-const cacheName = "asl-dice-v8";
+const cacheName = "asl-dice-v9";
 const appShell = [
   "./",
   "./index.html",
