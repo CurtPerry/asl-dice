@@ -44,6 +44,7 @@
           <button class="mode-button" type="button" data-mode="Amb">Amb</button>
           <button class="mode-button" type="button" data-mode="CC">CC</button>
           <button class="mode-button" type="button" data-mode="TH">TH</button>
+          <button class="mode-button" type="button" data-mode="RS">RS</button>
           <button class="mode-button" type="button" data-mode="GEN">GEN</button>
         </div>
 
@@ -82,6 +83,15 @@
         <div class="hip-panel hidden" id="hip-panel">
           <div class="hip-status" id="hip-status"></div>
           <div class="hip-location-grid" id="hip-location-grid" aria-label="HIP locations"></div>
+        </div>
+
+        <div class="random-selection-panel hidden" id="random-selection-panel">
+          <div class="random-selection-grid" aria-label="Random selection dice">
+            <button class="random-selection-option active" type="button" data-random-dice="2">2</button>
+            <button class="random-selection-option" type="button" data-random-dice="3">3</button>
+            <button class="random-selection-option" type="button" data-random-dice="4">4</button>
+            <button class="random-selection-option" type="button" data-random-dice="5">5</button>
+          </div>
         </div>
 
         <button class="roll-button" id="roll-button" type="button">Roll</button>
