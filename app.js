@@ -8,6 +8,7 @@ const rollTypes = {
   Amb: { label: "Ambush Roll", dice: 1 },
   CC: { label: "Close Combat Roll", dice: 2 },
   TH: { label: "To Hit", dice: 2 },
+  RS: { label: "RND SEL", dice: 0 },
   GEN: { label: "General Roll", dice: 2 },
 };
 
@@ -38,6 +39,7 @@ let selectedSide = "Axis";
 let selectedMode = "MC";
 let selectedFirepower = 8;
 let selectedModifier = 0;
+let selectedRandomDice = 2;
 let logEntries = loadLog();
 let hipState = loadHipState();
 
@@ -51,6 +53,7 @@ const iftPanel = document.querySelector("#ift-panel");
 const hipPanel = document.querySelector("#hip-panel");
 const hipStatus = document.querySelector("#hip-status");
 const hipLocationGrid = document.querySelector("#hip-location-grid");
+const randomSelectionPanel = document.querySelector("#random-selection-panel");
 const setupOverlay = document.querySelector("#setup-overlay");
 const closeSetupButton = document.querySelector("#close-setup");
 const createHipSetupButton = document.querySelector("#create-hip-setup");
@@ -84,6 +87,13 @@ document.querySelectorAll("[data-modifier]").forEach((button) => {
   button.addEventListener("click", () => {
     selectedModifier = Number(button.dataset.modifier);
     setActive("[data-modifier]", button);
+  });
+});
+
+document.querySelectorAll("[data-random-dice]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedRandomDice = Number(button.dataset.randomDice);
+    setActive("[data-random-dice]", button);
   });
 });
 
@@ -127,6 +137,11 @@ function rollDice() {
     return;
   }
 
+  if (selectedMode === "RS") {
+    rollRandomSelection();
+    return;
+  }
+
   const rollType = rollTypes[selectedMode];
   const rolls = Array.from({ length: rollType.dice }, () => randomDie());
   const rawTotal = rolls.reduce((sum, roll) => sum + roll, 0);
@@ -166,8 +181,20 @@ function setActive(selector, activeButton) {
 function updateModePanels() {
   iftPanel.classList.toggle("hidden", selectedMode !== "IFT");
   hipPanel.classList.toggle("hidden", selectedMode !== "HIP");
+  randomSelectionPanel.classList.toggle("hidden", selectedMode !== "RS");
   rollButton.classList.toggle("hidden", selectedMode === "HIP");
   renderHipPanel();
+}
+
+function rollRandomSelection() {
+  const rolls = Array.from({ length: selectedRandomDice }, () => randomDie());
+
+  addLogEntry({
+    label: "RND SEL",
+    rolls,
+    randomSelection: true,
+    total: "",
+  });
 }
 
 function getIftResult(firepower, total) {
@@ -277,20 +304,25 @@ function renderLogEntry(item, entry) {
 
   const prefix = document.createElement("span");
   prefix.className = "log-label";
-  prefix.textContent = `${entry.side} ${entry.label}: `;
+  prefix.textContent = entry.side ? `${entry.side} ${entry.label}: ` : `${entry.label}: `;
   item.append(prefix);
 
   entry.rolls.forEach((roll, index) => {
-    if (index > 0) {
+    if (index > 0 && !entry.randomSelection) {
       const plus = document.createElement("span");
       plus.className = "log-operator";
       plus.textContent = "+";
       item.append(plus);
     }
 
+    if (index > 0 && entry.randomSelection) {
+      item.append(document.createTextNode(" "));
+    }
+
     const die = document.createElement("span");
-    die.className = `log-die ${index === 0 ? "log-white-die" : "log-red-die"}`;
+    die.className = getLogDieClass(entry, index);
     die.textContent = roll;
+    applyRandomSelectionDieStyle(die, entry, index);
     item.append(die);
   });
 
@@ -303,8 +335,10 @@ function renderLogEntry(item, entry) {
 
   const total = document.createElement("span");
   total.className = "log-total";
-  total.textContent = ` = ${entry.total}`;
-  item.append(total);
+  if (entry.total !== "") {
+    total.textContent = ` = ${entry.total}`;
+    item.append(total);
+  }
 
   if (entry.result) {
     const result = document.createElement("span");
@@ -319,6 +353,25 @@ function renderLogEntry(item, entry) {
     cowerResult.textContent = ` (Cower: ${entry.cowerResult})`;
     item.append(cowerResult);
   }
+}
+
+function getLogDieClass(entry, index) {
+  if (entry.randomSelection) {
+    return "log-die log-random-die";
+  }
+
+  return `log-die ${index === 0 ? "log-white-die" : "log-red-die"}`;
+}
+
+function applyRandomSelectionDieStyle(die, entry, index) {
+  if (!entry.randomSelection) {
+    return;
+  }
+
+  const lastIndex = Math.max(entry.rolls.length - 1, 1);
+  const shade = Math.round((index / lastIndex) * 255);
+  die.style.background = `rgb(${shade}, ${shade}, ${shade})`;
+  die.style.color = shade < 128 ? "#fffaf0" : "#17211c";
 }
 
 function openSetup() {
